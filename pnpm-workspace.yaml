@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: false
+  workerd: true
+minimumReleaseAgeExclude:
+  - wrangler@4.137.0

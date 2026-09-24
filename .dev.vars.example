@@ -1,0 +1,2 @@
+# 本地 Workers 预览沿用 Next.js 的 .env / .env.development 配置。
+NEXTJS_ENV=development
