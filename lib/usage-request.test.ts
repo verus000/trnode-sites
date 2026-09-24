@@ -22,7 +22,7 @@ const payload = {
 };
 
 describe("requestAccountUsage", () => {
-  it("sends the fixed account query without caching", async () => {
+  it.each([4, 14])("使用账号 %i 请求实时额度且不缓存", async (accountId) => {
     let requestedUrl: URL | undefined;
     let requestedInit: RequestInit | undefined;
     const fetcher = vi.fn(async (url: URL, init: RequestInit) => {
@@ -31,6 +31,7 @@ describe("requestAccountUsage", () => {
       return Response.json(payload);
     });
     const result = await requestAccountUsage({
+      accountId,
       apiKey: "test-secret",
       baseUrl: "https://example.com",
       fetcher,
@@ -38,7 +39,7 @@ describe("requestAccountUsage", () => {
 
     expect(result.ok).toBe(true);
     if (!requestedUrl || !requestedInit) throw new Error("Expected an upstream request");
-    expect(requestedUrl.pathname).toBe("/api/v1/admin/accounts/4/usage");
+    expect(requestedUrl.pathname).toBe(`/api/v1/admin/accounts/${accountId}/usage`);
     expect(requestedUrl.searchParams.get("source")).toBe("active");
     expect(requestedUrl.searchParams.get("force")).toBe("true");
     expect(requestedUrl.searchParams.get("timezone")).toBe("Asia/Shanghai");
@@ -49,6 +50,7 @@ describe("requestAccountUsage", () => {
 
   it("returns a safe error for a non-2xx response", async () => {
     const result = await requestAccountUsage({
+      accountId: 14,
       apiKey: "test-secret",
       baseUrl: "https://example.com",
       fetcher: async () => new Response(null, { status: 503 }),
@@ -59,6 +61,7 @@ describe("requestAccountUsage", () => {
 
   it("returns a safe error for a business failure", async () => {
     const result = await requestAccountUsage({
+      accountId: 14,
       apiKey: "test-secret",
       baseUrl: "https://example.com",
       fetcher: async () => Response.json({ code: 401, message: "contains private detail" }),
@@ -69,6 +72,7 @@ describe("requestAccountUsage", () => {
 
   it("returns a safe error when the request times out", async () => {
     const result = await requestAccountUsage({
+      accountId: 14,
       apiKey: "test-secret",
       baseUrl: "https://example.com",
       fetcher: async () => {

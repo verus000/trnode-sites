@@ -1,50 +1,42 @@
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Users } from "lucide-react";
 
+import { AccountUsageGroup } from "@/components/account-usage-group";
 import { RefreshButton } from "@/components/refresh-button";
-import { UsageWindowCard } from "@/components/usage-window-card";
-import { getAccountUsage } from "@/lib/usage";
+import { getAccountsUsage } from "@/lib/usage";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccountUsagePage() {
-  const result = await getAccountUsage();
-  const showFiveHour = result.ok && result.data.fiveHour.utilization > 0;
+  const result = await getAccountsUsage();
 
   return (
     <main className="shell">
       <section className="workspace">
-        {result.ok ? (
-          <>
-            <div className={`usageGrid${showFiveHour ? "" : " usageGrid--single"}`}>
-              {showFiveHour && (
-                <UsageWindowCard
-                  title="5 小时额度"
-                  description="短时额度"
-                  window={result.data.fiveHour}
-                />
-              )}
-              <UsageWindowCard
-                title="7 天额度"
-                description="周额度"
-                window={result.data.sevenDay}
-                action={<RefreshButton label="刷新" />}
-              />
+        {!result.ok ? (
+          <section className="errorState" role="alert">
+            <span className="errorIcon"><AlertCircle aria-hidden="true" size={22} /></span>
+            <div>
+              <h2>暂时无法获取账号列表</h2>
+              <p>{result.message}</p>
             </div>
-          </>
+          </section>
+        ) : result.data.length === 0 ? (
+          <section className="emptyState" role="status">
+            <Users aria-hidden="true" size={30} />
+            <h2>暂无账号</h2>
+            <p>添加账号后，点击“重新查询”查看额度。</p>
+          </section>
         ) : (
-          <>
-            <section className="errorState" role="alert">
-              <span className="errorIcon"><AlertCircle aria-hidden="true" size={22} /></span>
-              <div>
-                <h2>暂时无法获取额度</h2>
-                <p>{result.message}</p>
-              </div>
-            </section>
-            <div className="errorActions">
-              <RefreshButton label="重新尝试" />
-            </div>
-          </>
+          <div className="accountsList">
+            {result.data.map((entry) => (
+              <AccountUsageGroup key={entry.account.id} account={entry.account} usage={entry.usage} />
+            ))}
+          </div>
         )}
+
+        <div className="floatingRefresh">
+          <RefreshButton label="重新查询" />
+        </div>
       </section>
     </main>
   );

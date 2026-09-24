@@ -2,23 +2,24 @@ import { parseUsageResponse } from "./usage-parser";
 import type { UsageResult } from "./usage-types";
 
 export const DEFAULT_REQUEST_TIMEOUT_MS = 12_000;
-const ACCOUNT_ID = 4;
 
 export type UsageFetch = (url: URL, init: RequestInit) => Promise<Response>;
 
 export async function requestAccountUsage({
+  accountId,
   apiKey,
   baseUrl,
   fetcher = fetch,
   timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
 }: {
+  accountId: number;
   apiKey: string;
   baseUrl: string;
   fetcher?: UsageFetch;
   timeoutMs?: number;
 }): Promise<UsageResult> {
   try {
-    const url = new URL(`/api/v1/admin/accounts/${ACCOUNT_ID}/usage`, baseUrl);
+    const url = new URL(`/api/v1/admin/accounts/${accountId}/usage`, baseUrl);
     url.searchParams.set("source", "active");
     url.searchParams.set("force", "true");
     url.searchParams.set("timezone", "Asia/Shanghai");

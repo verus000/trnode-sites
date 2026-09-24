@@ -38,7 +38,7 @@ export function UsageWindowCard({
       <div className="cardHeading">
         <div>
           <p className="eyebrow">{description}</p>
-          <h2>{title}</h2>
+          <h3>{title}</h3>
         </div>
         <div className={`utilization utilization--${tone}`}>
           <strong>{integerFormatter.format(window.utilization)}%</strong>
